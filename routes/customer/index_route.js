@@ -1,4 +1,0 @@
-const home = require("./home")
-module.exports = (app) => {
-  app.use('/api', home)
-}

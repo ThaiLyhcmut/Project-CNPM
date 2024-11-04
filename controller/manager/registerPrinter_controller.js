@@ -1,4 +1,4 @@
-const Print = require("../../model/Print")
+const Printer = require("../../model/Printer")
 
 module.exports.registerPrinter = (res, req) => {
   
