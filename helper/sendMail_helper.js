@@ -3,8 +3,8 @@ const nodemailer = require('nodemailer');
 module.exports.sendMail = (email, subject, text) => {
   const transporter = nodemailer.createTransport({
     host: 's129d209.emailserver.vn',
-    port: 587,
-    secure: false, // use false for STARTTLS; true for SSL on port 465
+    port: 465,
+    secure: true, // use false for STARTTLS; true for SSL on port 465
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
