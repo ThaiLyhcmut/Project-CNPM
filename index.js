@@ -11,6 +11,10 @@ const app = express()
 const port = process.env.PORT;
 
 database.connect(process.env.MONGO_URL)
+
+app.use(cors());
+
+
 app.use(cookieParser());
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
