@@ -41,7 +41,8 @@ module.exports.loginController = async (req, res) => {
   });
   res.json({
     code: "success",
-    role: account.role
+    role: account.role,
+    token: "token"
   })
 }
 
@@ -93,7 +94,8 @@ module.exports.registerController = async (req, res) => {
     });
     res.json({
       code: "success",
-      role: newAccount.role
+      role: newAccount.role,
+      token: token
     })
     return 
   }

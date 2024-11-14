@@ -1,0 +1,8 @@
+services:
+
+  cnpm:
+    image: thaily/cnpm
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
