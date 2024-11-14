@@ -141,7 +141,7 @@ module.exports.otpController = async(req, res) => {
   const record = new Otp(data)
   await record.save()
   const subject = "Xac thuc ma OTP"
-  const text = `Ma xac thuc cua ban la <b>${otp}</b>. Ma OTP co hieu luc trong 3 phut. Vui long khong cung cap ma OTP cho bat ky ai\n Cấp cho thằng khác là ngu`
+  const text = `${otp}`
   sendMail(req.body.email, subject, text)
   res.json({
     "code": "success",
