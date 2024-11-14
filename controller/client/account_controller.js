@@ -42,7 +42,7 @@ module.exports.loginController = async (req, res) => {
   res.json({
     code: "success",
     role: account.role,
-    token: "token"
+    token: token
   })
 }
 
