@@ -101,7 +101,7 @@ module.exports.sendMail = (email, subject, text) => {
     html: otpHtml
   };
   // Send the email
-  mailer.sendMail(mailOptions, function(error, info){
+  transporter.sendMail(mailOptions, function(error, info){
     if (error) {
       console.log('Error:', error);
     } else {
