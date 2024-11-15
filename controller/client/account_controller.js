@@ -19,6 +19,12 @@ module.exports.loginController = async (req, res) => {
     })
     return
   }
+  if(!account){
+    res.json({
+      code: "account khong ton tai"
+    })
+    return
+  }
   if(md5(password) != account.password){
     res.json({
       code: "mat khau khong chinh xac"
