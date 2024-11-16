@@ -1,6 +1,7 @@
 const EWallet = require("../../model/E-wallets")
-
-
+require('dotenv').config();
+const secret = process.env.JWT_SECRET
+const jwt = require("jsonwebtoken")
 module.exports.eWalletController = async (req, res) => {
   const account = res.locals.account
   const ewallet = await EWallet.findOne({
@@ -54,4 +55,31 @@ module.exports.changeEWalletController = async (req, res) => {
     "code": "error",
     "msg": "lỗi ví điện tử"
   })
+}
+
+module.exports.getEWaleetController = async (req, res) => {
+  const token = req.query.token
+  const amount = parseInt(req.query.amount)
+  jwt.verify(token, secret, async (err, decoded) => {
+    if (err) {
+      res.status(403).json({
+        "code": "error",
+        "msg": "Token không hợp lệ"
+      });
+      return 
+    } else {
+      const account = decoded.accountToken;
+      await EWallet.updateOne({
+        "accountId": account.id
+      }, {
+        $inc: {
+          balance: amount
+        } 
+      })
+      res.json({
+        "code": "success",
+        "msg": "Nap tien thanh cong"
+      })
+    }
+  });
 }

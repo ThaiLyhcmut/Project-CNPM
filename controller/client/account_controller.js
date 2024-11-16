@@ -34,8 +34,9 @@ module.exports.loginController = async (req, res) => {
   const token = jwt.sign(
   {
     accountToken: {
-    "id": account.id,
-    "email": account.email,
+      "id": account.id,
+      "email": account.email,
+      "role": account.role
     }
   }, secret, { expiresIn: '12h' });
   // const refreshToken = jwt.sign( user.id , secret, { expiresIn: '12h' });

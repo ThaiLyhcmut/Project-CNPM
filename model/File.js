@@ -8,6 +8,7 @@ const FileSchema = new mongoose.Schema({
   link: String,
   linkPath: String,
   accountId: String,
+  pages: Number,
   length: Number,
 },{
     timestamps: true,

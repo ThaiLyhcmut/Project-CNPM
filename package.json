@@ -15,6 +15,7 @@
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.7",
     "npm": "^10.8.3",
+    "pdf-parse": "^1.1.1",
     "pug": "^3.0.3"
   },
   "name": "product-cnpm",
