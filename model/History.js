@@ -10,6 +10,8 @@ const HistorySchema = new mongoose.Schema({
   totle: Number,
   balance: Number,
   linkPath: String,
+  status: String,
+  printerId: String,
   expireAt: {
     type: Date,
     required: true,

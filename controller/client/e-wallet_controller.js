@@ -1,7 +1,8 @@
 const EWallet = require("../../model/E-wallets")
 require('dotenv').config();
 const secret = process.env.JWT_SECRET
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const Field = require("../../model/Field");
 module.exports.eWalletController = async (req, res) => {
   const account = res.locals.account
   const ewallet = await EWallet.findOne({
@@ -76,10 +77,22 @@ module.exports.getEWaleetController = async (req, res) => {
           balance: amount
         } 
       })
+      const ewallet = await EWallet.findOne({
+        "accountId": account.id
+      })
       res.json({
         "code": "success",
         "msg": "Nap tien thanh cong"
       })
+      const data = {
+        accountId: account.id,
+        transaction: "Nap",
+        amount: amount,
+        balance: ewallet.balance,
+        historyId: ""
+      }
+      const record = new Field(data)
+      await record.save()
     }
   });
 }

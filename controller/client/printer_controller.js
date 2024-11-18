@@ -3,6 +3,7 @@ const Account = require("../../model/Account")
 const EWallet = require("../../model/E-wallets")
 const File = require("../../model/File")
 const History = require("../../model/History")
+const Field = require("../../model/Field")
 
 
 module.exports.printerController = async (req, res) => {
@@ -20,6 +21,24 @@ module.exports.printerController = async (req, res) => {
   const printer = await Printer.find(find).sort(sort)
   res.json({
     listPrinter: printer
+  })
+}
+
+module.exports.getDetailController = async (req, res) => {
+  const id = req.params.id
+  if(!id){
+    res.json({
+      "code": "error",
+      "msg": "chua co id"
+    })
+  }
+  const printer = await Printer.findOne({
+    "_id": id
+  })
+  res.json({
+    "code": "error",
+    "msg": "lay thong cong may in",
+    "printer": printer
   })
 }
 
@@ -59,9 +78,7 @@ module.exports.postPrinterController = async (req, res) => {
     })
     return
   }
-  console.log(file, printer, eWallet)
   priceNew = file.pages*(printer.price* parseFloat((1 - printer.discountpercent/100).toFixed(2)))
-  console.log(priceNew)
   if(eWallet.balance < priceNew){
     res.json({
       "code": "error",
@@ -70,7 +87,6 @@ module.exports.postPrinterController = async (req, res) => {
     return
   }
   balanceNew = eWallet.balance - priceNew
-  console.log(balanceNew)
   await EWallet.updateOne({
     "_id": eWallet.id
   }, {
@@ -90,7 +106,19 @@ module.exports.postPrinterController = async (req, res) => {
     totle: priceNew,
     balance: balanceNew,
     linkPath: file.linkPath,
+    status: "doing",
+    printerId: printer.id
   }
   const record = new History(dataHistory)
   await record.save()
+
+  const data = {
+    accountId: account.id,
+    transaction: "In",
+    amount: priceNew,
+    balance: balanceNew,
+    historyId: dataHistory.id
+  }
+  const record2 = new Field(data)
+  await record2.save()
 }

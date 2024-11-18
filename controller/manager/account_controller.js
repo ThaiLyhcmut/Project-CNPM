@@ -3,6 +3,7 @@ const Account = require("../../model/Account")
 const jwt = require("jsonwebtoken")
 require('dotenv').config();
 const secret = process.env.JWT_SECRET
+
 module.exports.postLoginController = async (req, res) => {
   const userAgent = req.headers['user-agent'];
   const email = req.body.email
