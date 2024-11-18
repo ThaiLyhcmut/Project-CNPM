@@ -7,7 +7,7 @@ module.exports.requireAuth = async (req, res, next) => {
   // Lấy token từ header Authorization
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-
+  const userAgent = req.headers['user-agent'];
   if (!token) {
     return res.status(401).json({
       "code": "error",
@@ -23,7 +23,10 @@ module.exports.requireAuth = async (req, res, next) => {
       });
     } else {
       res.locals.account = decoded.accountToken;
-      next();
+      if(decoded.accountToken.userAgent === userAgent){
+        next()
+      }
+      return
     }
   });
 }

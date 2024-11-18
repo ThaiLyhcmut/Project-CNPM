@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken")
 require('dotenv').config();
 const secret = process.env.JWT_SECRET
 module.exports.postLoginController = async (req, res) => {
+  const userAgent = req.headers['user-agent'];
   const email = req.body.email
   const password = req.body.password
   const account = await Account.findOne({
@@ -32,7 +33,8 @@ module.exports.postLoginController = async (req, res) => {
     accountToken: {
     "id": account.id,
     "email": account.email,
-    "role": account.role
+    "role": account.role,
+    "userAgent": userAgent
     }
   }, secret, { expiresIn: '12h' });
   // const refreshToken = jwt.sign( user.id , secret, { expiresIn: '12h' });

@@ -13,7 +13,6 @@ module.exports.postPrintController = async (req, res) => {
 module.exports.getPrintStatusController = async (req, res) => {
   find = {
     deleted: false,
-    status: "active"
   }
   sort = {}
   if(req.query.cs){
@@ -24,12 +23,28 @@ module.exports.getPrintStatusController = async (req, res) => {
   }
   const printer = await Printer.find(find).sort(sort)
   res.json({
-    listPrinter: printer
-  })
-  res.json({
     code: "success",
     msg: "lay may in thanh cong",
     printer: printer
+  })
+}
+
+
+module.exports.getDetailController = async (req, res) => {
+  const id = req.params.id
+  if(!id){
+    res.json({
+      "code": "error",
+      "msg": "chua co id"
+    })
+  }
+  const printer = await Printer.findOne({
+    "_id": id
+  })
+  res.json({
+    "code": "error",
+    "msg": "lay thong cong may in",
+    "printer": printer
   })
 }
 
@@ -65,5 +80,19 @@ module.exports.patchChangePrinterController = async (req, res) => {
 }
 
 module.exports.deletePrinterController = async (req, res) => {
-  
+  const id = req.params.id
+  if(!id){
+    res.json({
+      "code": "error",
+      "msg": "id m dau"
+    })
+    return
+  }
+  await Printer.deleteOne({
+    "_id": id
+  })
+  res.json({
+    "code": "success",
+    "msg": "xoa may in thanh cong"
+  })
 }

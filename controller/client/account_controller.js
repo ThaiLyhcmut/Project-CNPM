@@ -8,6 +8,13 @@ const EWallet = require("../../model/E-wallets");
 require('dotenv').config();
 const secret = process.env.JWT_SECRET; 
 module.exports.loginController = async (req, res) => {
+  const userAgent = req.headers['user-agent'];
+  if(!userAgent){
+    res.json({
+      "code": "error",
+      "msg": "Mầy biến khỏi đây"
+    })
+  }
   const email = req.body.email
   const password = req.body.password
   const account = await Account.findOne({
@@ -36,7 +43,8 @@ module.exports.loginController = async (req, res) => {
     accountToken: {
       "id": account.id,
       "email": account.email,
-      "role": account.role
+      "role": account.role,
+      "userAgent": userAgent
     }
   }, secret, { expiresIn: '12h' });
   // const refreshToken = jwt.sign( user.id , secret, { expiresIn: '12h' });
@@ -54,6 +62,13 @@ module.exports.loginController = async (req, res) => {
 }
 
 module.exports.registerController = async (req, res) => {
+  const userAgent = req.headers['user-agent'];
+  if(!userAgent){
+    res.json({
+      "code": "error",
+      "msg": "Mầy biến khỏi đây"
+    })
+  }
   const account = await Account.findOne({
     email: req.body.email
   })
@@ -88,8 +103,10 @@ module.exports.registerController = async (req, res) => {
     const token = jwt.sign(
       {
         accountToken: {
-        "id": newAccount.id,
-        "email": newAccount.email,
+          "id": newAccount.id,
+          "email": newAccount.email,
+          "role": newAccount.role,
+          "userAgent": userAgent
         }
       }, secret, { expiresIn: '12h' });
     await newAccount.save()
