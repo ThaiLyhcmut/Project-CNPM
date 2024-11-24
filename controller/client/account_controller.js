@@ -9,12 +9,15 @@ require('dotenv').config();
 const secret = process.env.JWT_SECRET; 
 module.exports.loginController = async (req, res) => {
   const userAgent = req.headers['user-agent'];
+  console.log("1", req.headers)
   if(!userAgent){
     res.json({
       "code": "error",
       "msg": "Mầy biến khỏi đây"
     })
+    return
   }
+  console.log("2")
   const email = req.body.email
   const password = req.body.password
   const account = await Account.findOne({
@@ -38,6 +41,7 @@ module.exports.loginController = async (req, res) => {
     })
     return
   }
+  console.log("3")
   const token = jwt.sign(
   {
     accountToken: {
@@ -54,6 +58,7 @@ module.exports.loginController = async (req, res) => {
     secure: true,
     sameSite: 'Strict'
   });
+  console.log("4")
   res.json({
     code: "success",
     role: account.role,

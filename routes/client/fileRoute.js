@@ -15,8 +15,18 @@ const storage = multer.diskStorage({
     const newName = utf8Name.replace(/\s+/g, '-'); // Thay thế khoảng trắng bằng dấu '-'
     cb(null, newName);
   }
+  
 });
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    // Kiểm tra loại MIME của file
+    if (file.mimetype !== 'application/pdf') {
+      return cb(new Error('Chỉ cho phép tải lên file PDF'), false);
+    }
+    cb(null, true);
+  }
+});
 
 router.get("/", controller.getFileController)
 router.delete("/:id", controller.deleteFileController)
