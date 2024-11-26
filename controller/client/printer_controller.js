@@ -78,47 +78,39 @@ module.exports.postPrinterController = async (req, res) => {
     })
     return
   }
-  priceNew = file.pages*(printer.price* parseFloat((1 - printer.discountpercent/100).toFixed(2)))
-  if(eWallet.balance < priceNew){
+  let paper = parseInt((file.pages + 1)/2)
+  if(printer.type == "A3"){
+    paper = file.pages
+  }
+  if(eWallet.balancePaper < paper){
     res.json({
       "code": "error",
       "msg": "Bạn nghèo tôi cũng nghèo cố gắng nạp tiền vào để in nhe"
     })
     return
   }
-  balanceNew = eWallet.balance - priceNew
+  balancePaperNew = eWallet.balancePaper - paper
   await EWallet.updateOne({
     "_id": eWallet.id
   }, {
-    balance: balanceNew
+    balancePaper: balancePaperNew
   })
   res.json({
     "code": "success",
     "msg": "Bạn đã in thành công",
-    "balanceNew": balanceNew
+    "balancePaper": balancePaperNew
   })
   const dataHistory = {
     accountId: account.id,
     cs: printer.cs,
     location: printer.location,
-    price: (printer.price* parseFloat((1 - printer.discountpercent/100).toFixed(2))),
     pages: file.pages,
-    totle: priceNew,
-    balance: balanceNew,
+    totle: paper,
+    balancePaperNew: balancePaperNew,
     linkPath: file.linkPath,
     status: "doing",
     printerId: printer.id
   }
   const record = new History(dataHistory)
   await record.save()
-
-  const data = {
-    accountId: account.id,
-    transaction: "In",
-    amount: priceNew,
-    balance: balanceNew,
-    historyId: dataHistory.id
-  }
-  const record2 = new Field(data)
-  await record2.save()
 }

@@ -4,54 +4,6 @@ const jwt = require("jsonwebtoken")
 require('dotenv').config();
 const secret = process.env.JWT_SECRET
 
-module.exports.postLoginController = async (req, res) => {
-  const userAgent = req.headers['user-agent'];
-  const email = req.body.email
-  const password = req.body.password
-  const account = await Account.findOne({
-    email: email
-  })
-  if(!email){
-    res.json({
-      code: "email khong ton tai"
-    })
-    return
-  }
-  if(!account){
-    res.json({
-      code: "account khong ton tai"
-    })
-    return
-  }
-  if(md5(password) != account.password){
-    res.json({
-      code: "mat khau khong chinh xac"
-    })
-    return
-  }
-  const token = jwt.sign(
-  {
-    accountToken: {
-    "id": account.id,
-    "email": account.email,
-    "role": account.role,
-    "userAgent": userAgent
-    }
-  }, secret, { expiresIn: '12h' });
-  // const refreshToken = jwt.sign( user.id , secret, { expiresIn: '12h' });
-  
-  res.cookie('token', token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'Strict'
-  });
-  res.json({
-    code: "success",
-    role: account.role,
-    token: token
-  })
-}
-
 module.exports.getAccountController = async (req, res) => {
   const account = await Account.findOne({
     "_id": res.locals.account.id 
@@ -80,5 +32,15 @@ module.exports.getAcoountStudentController = async (req, res) => {
     "code": "error",
     "msg": "Lấy ra account thành công",
     "account": account
+  })
+}
+
+module.exports.getAllAcountController = async (req, res) => {
+  const accounts = await Account.find({
+    "role": "student"
+  }).select("name id phone email")
+  res.json({
+    "code": "success",
+    "accounts": accounts
   })
 }

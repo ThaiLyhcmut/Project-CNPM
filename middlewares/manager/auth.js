@@ -1,3 +1,4 @@
+const md5 = require("md5");
 const Account = require("../../model/Account")
 const jwt = require("jsonwebtoken")
 require('dotenv').config();
@@ -17,19 +18,21 @@ module.exports.requireAuth = async (req, res, next) => {
 
   jwt.verify(token, secret, async (err, decoded) => {
     if (err) {
-      return res.status(403).json({
+      return res.status(401).json({
         "code": "error",
         "msg": "Token không hợp lệ"
       });
     } else {
       res.locals.account = decoded.accountToken;
-      if(decoded.accountToken.userAgent === userAgent && decoded.accountToken.role === "manager"){
+      if(decoded.accountToken.key === md5(userAgent) && decoded.accountToken.role === "manager"){
         next()
       }
-      return res.status(403).json({
-        "code": "error",
-        "msg": "Token không hợp lệ"
-      });
+      else {
+        return res.status(403).json({
+          "code": "error",
+          "msg": "Token không hợp lệ"
+        });
+      }
     }
   });
 }

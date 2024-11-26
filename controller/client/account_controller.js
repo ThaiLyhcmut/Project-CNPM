@@ -9,7 +9,6 @@ require('dotenv').config();
 const secret = process.env.JWT_SECRET; 
 module.exports.loginController = async (req, res) => {
   const userAgent = req.headers['user-agent'];
-  console.log("1", req.headers)
   if(!userAgent){
     res.json({
       "code": "error",
@@ -17,7 +16,6 @@ module.exports.loginController = async (req, res) => {
     })
     return
   }
-  console.log("2")
   const email = req.body.email
   const password = req.body.password
   const account = await Account.findOne({
@@ -41,48 +39,35 @@ module.exports.loginController = async (req, res) => {
     })
     return
   }
-  console.log("3")
   const token = jwt.sign(
   {
     accountToken: {
       "id": account.id,
       "email": account.email,
       "role": account.role,
-      "userAgent": userAgent
+      "key": md5(userAgent)
     }
-  }, secret, { expiresIn: '12h' });
-  // const refreshToken = jwt.sign( user.id , secret, { expiresIn: '12h' });
-  
-  res.cookie('token', token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'Strict'
-  });
-  console.log("4")
+  }, secret, { expiresIn: '30m' });
+  const rftoken = jwt.sign(
+  {
+    token: token,
+    id: account.id
+  }, secret, { expiresIn: '168h' });
   res.json({
     code: "success",
     role: account.role,
-    token: token
+    token: token,
+    rftoken: rftoken
   })
 }
 
-module.exports.registerController = async (req, res) => {
+module.exports.resetPasswordController = async (req, res) => {
   const userAgent = req.headers['user-agent'];
   if(!userAgent){
     res.json({
       "code": "error",
       "msg": "Mầy biến khỏi đây"
     })
-  }
-  const account = await Account.findOne({
-    email: req.body.email
-  })
-  if(account){
-    res.json({
-      "code": "error",
-      "msg": "email da duoc dang ky tai khoan"
-    })
-    return
   }
   const isOtp = await Otp.findOne({
     email: req.body.email,
@@ -95,6 +80,10 @@ module.exports.registerController = async (req, res) => {
     })
     return
   }
+  await Otp.deleteOne({
+    email: req.body.email,
+    otp: req.body.otp
+  })
   if(req.body.email && req.body.password && req.body.name && req.body.phone){
     req.body.role = "student"
     req.body.password = md5(req.body.password)
@@ -103,30 +92,65 @@ module.exports.registerController = async (req, res) => {
     const newEWallet = new EWallet({
       "accountId": newAccount.id,
       "balance": 0,
+      "balancePaper": 0,
       "mssv": ""
     })
+    await newAccount.save()
+    await newEWallet.save()
     const token = jwt.sign(
       {
         accountToken: {
           "id": newAccount.id,
           "email": newAccount.email,
           "role": newAccount.role,
-          "userAgent": userAgent
+          "key": md5(userAgent)
         }
-      }, secret, { expiresIn: '12h' });
-    await newAccount.save()
-    await newEWallet.save()
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'Strict'
-    });
+      }, secret, { expiresIn: '30m' });
+      const rftoken = jwt.sign(
+      {
+        token: token,
+        id: newAccount.id
+      }, secret, { expiresIn: '168h' });
     res.json({
       code: "success",
       role: newAccount.role,
-      token: token
+      token: token,
+      rftoken: rftoken
     })
     return 
+  }
+  else if(req.body.email && req.body.password) {
+    const account = await Account.findOne({
+      email: req.body.email
+    })
+    if(account){
+      await Account.updateOne({
+        "_id": account.id
+      }, {
+        password: md5(req.body.password)
+      })
+      const token = jwt.sign(
+        {
+          accountToken: {
+            "id": account.id,
+            "email": account.email,
+            "role": account.role,
+            "key": md5(userAgent)
+          }
+        }, secret, { expiresIn: '30m' });
+        const rftoken = jwt.sign(
+        {
+          token: token,
+          id: account.id
+        }, secret, { expiresIn: '168h' });
+      res.json({
+        code: "success",
+        role: account.role,
+        token: token,
+        rftoken: rftoken
+      })
+      return 
+    }
   }
   res.json({
     code: "fail"
@@ -141,16 +165,16 @@ module.exports.otpController = async(req, res) => {
     })
     return
   }
-  const newAccount = await Account.findOne({
-    email: req.body.email
-  })
-  if(newAccount){
-    res.json({
-      "code": "error",
-      "msg": "email da duoc dang ky tai khoan"
-    })
-    return
-  }
+  // const newAccount = await Account.findOne({
+  //   email: req.body.email
+  // })
+  // if(newAccount){
+  //   res.json({
+  //     "code": "error",
+  //     "msg": "email da duoc dang ky tai khoan"
+  //   })
+  //   return
+  // }
   const isOtp = await Otp.findOne({
     email: req.body.email
   })

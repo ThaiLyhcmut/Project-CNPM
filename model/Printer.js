@@ -9,8 +9,7 @@ const PrinterSchema = new mongoose.Schema({
   description: String,
   location: String,
   status: String,
-  price: Number,
-  discountpercent: Number,
+  type: String,
   deleted: Boolean
 },{
   timestamps: true,
