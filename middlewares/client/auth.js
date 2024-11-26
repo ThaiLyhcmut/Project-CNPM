@@ -20,16 +20,16 @@ module.exports.requireAuth = async (req, res, next) => {
     if (err) {
       return res.status(403).json({
         "code": "error",
-        "msg": "Token không hợp lệ"
+        "msg": "Token không hợp lệ 1"
       });
     } else {
       res.locals.account = decoded.accountToken;
-      if(decoded.accountToken.userAgent === userAgent){
+      if(decoded.accountToken.userAgent === userAgent && decoded.accountToken.role === "student"){
         next()
       }
       else {return res.status(403).json({
         "code": "error",
-        "msg": "Token không hợp lệ"
+        "msg": "Token không hợp lệ 2"
       });}
     }
   });

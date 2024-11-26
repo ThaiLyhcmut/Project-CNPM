@@ -23,10 +23,13 @@ module.exports.requireAuth = async (req, res, next) => {
       });
     } else {
       res.locals.account = decoded.accountToken;
-      if(decoded.accountToken.userAgent === userAgent){
+      if(decoded.accountToken.userAgent === userAgent && decoded.accountToken.role === "manager"){
         next()
       }
-      return
+      return res.status(403).json({
+        "code": "error",
+        "msg": "Token không hợp lệ"
+      });
     }
   });
 }

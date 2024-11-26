@@ -17,21 +17,42 @@ module.exports.getFileController = async (req, res) => {
 }
 
 module.exports.deleteFileController = async (req, res) => {
-  const fileId = req.params.id
-  if(!fileId) {
-    res.json({
-      "code": "succes",
-      "msg": "Lỗi không tìm được file"
-    })
+  const fileId = req.params.id;
+
+  if (!fileId) {
+    return res.status(400).json({
+      code: "error",
+      msg: "Lỗi: Không tìm thấy ID của file"
+    });
   }
-  await File.deleteOne({
-    "id": fileId
-  })
-  res.json({
-    "code": "succes",
-    "msg": "xoa file thanh cong"
-  })
-}
+
+  try {
+    // Thực hiện xóa file
+    const result = await File.deleteOne({ "_id": fileId });
+
+    // Kiểm tra xem file có tồn tại và đã được xóa thành công hay không
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        code: "error",
+        msg: "Không tìm thấy file để xóa"
+      });
+    }
+
+    // Nếu xóa thành công
+    res.status(200).json({
+      code: "success",
+      msg: "Xóa file thành công"
+    });
+
+  } catch (error) {
+    // Xử lý lỗi nếu có
+    console.error(error);
+    res.status(500).json({
+      code: "error",
+      msg: "Đã xảy ra lỗi khi xóa file"
+    });
+  }
+};
 
 async function countPdfPages(filePath) {
   const dataBuffer = fs.readFileSync(filePath);

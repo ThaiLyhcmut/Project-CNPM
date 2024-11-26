@@ -59,40 +59,59 @@ module.exports.changeEWalletController = async (req, res) => {
 }
 
 module.exports.getEWaleetController = async (req, res) => {
-  const token = req.query.token
-  const amount = parseInt(req.query.amount)
-  jwt.verify(token, secret, async (err, decoded) => {
-    if (err) {
-      res.status(403).json({
+  try{
+    const token = req.query.token
+    if (!req.query.amount) {
+      res.status(400).json({
         "code": "error",
-        "msg": "Token không hợp lệ"
+        "msg": "vui long nhap so tien"
       });
-      return 
-    } else {
-      const account = decoded.accountToken;
-      await EWallet.updateOne({
-        "accountId": account.id
-      }, {
-        $inc: {
-          balance: amount
-        } 
-      })
-      const ewallet = await EWallet.findOne({
-        "accountId": account.id
-      })
-      res.json({
-        "code": "success",
-        "msg": "Nap tien thanh cong"
-      })
-      const data = {
-        accountId: account.id,
-        transaction: "Nap",
-        amount: amount,
-        balance: ewallet.balance,
-        historyId: ""
-      }
-      const record = new Field(data)
-      await record.save()
     }
-  });
+    const amount = parseInt(req.query.amount)
+    if (isNaN(amount)) {
+      return res.status(400).json({
+        code: "error",
+        msg: "Số tiền không hợp lệ. Vui lòng nhập số tiền hợp lệ.",
+      });
+    }
+    jwt.verify(token, secret, async (err, decoded) => {
+      if (err) {
+        res.status(403).json({
+          "code": "error",
+          "msg": "Token không hợp lệ"
+        });
+        return 
+      } else {
+        const account = decoded.accountToken;
+        await EWallet.updateOne({
+          "accountId": account.id
+        }, {
+          $inc: {
+            balance: amount
+          } 
+        })
+        const ewallet = await EWallet.findOne({
+          "accountId": account.id
+        })
+        res.json({
+          "code": "success",
+          "msg": "Nap tien thanh cong"
+        })
+        const data = {
+          accountId: account.id,
+          transaction: "Nap",
+          amount: amount,
+          balance: ewallet.balance,
+          historyId: ""
+        }
+        const record = new Field(data)
+        await record.save()
+      }
+    });
+  }catch(error){
+    res.json({
+      "code": "error",
+      "msg": error
+    })
+  }
 }
