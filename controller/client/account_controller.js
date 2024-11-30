@@ -1,10 +1,9 @@
-const Account = require("../../model/Account")
 const jwt = require('jsonwebtoken');
 const md5 = require("md5");
-const Otp = require("../../model/Otp");
 const { generateRandomNumber } = require("../../helper/generate_helper");
 const { sendMail } = require("../../helper/sendMail_helper");
-const EWallet = require("../../model/E-wallets");
+const { GetOtp, UpdateAccountPassword, InsertAccount, GetAccountByEmail, GetAccountById } = require("../../service/account_service");
+const { InsertEWallet } = require("../../service/e-wallet_service");
 require('dotenv').config();
 const secret = process.env.JWT_SECRET; 
 module.exports.loginController = async (req, res) => {
@@ -18,9 +17,7 @@ module.exports.loginController = async (req, res) => {
   }
   const email = req.body.email
   const password = req.body.password
-  const account = await Account.findOne({
-    email: email
-  })
+  const account = await GetAccountByEmail(email)
   if(!email){
     res.json({
       code: "email khong ton tai"
@@ -69,34 +66,27 @@ module.exports.resetPasswordController = async (req, res) => {
       "msg": "Mầy biến khỏi đây"
     })
   }
-  const isOtp = await Otp.findOne({
-    email: req.body.email,
-    otp: req.body.otp
-  })
-  if(!isOtp){
+  const isOtp = await GetOtp(email)
+  if(!isOtp || isOtp.otp != otp){
     res.json({
       "code": "error",
       "msg": "otp không hợp lệ"
     })
     return
   }
-  await Otp.deleteOne({
-    email: req.body.email,
-    otp: req.body.otp
-  })
+  DeleteOtp()
   if(req.body.email && req.body.password && req.body.name && req.body.phone){
     req.body.role = "student"
     req.body.password = md5(req.body.password)
     req.body.avatar = ""
-    const newAccount = new Account(req.body)
-    const newEWallet = new EWallet({
+    await InsertAccount(req.body)
+    const newEWallet = {
       "accountId": newAccount.id,
       "balance": 0,
       "balancePaper": 0,
       "mssv": ""
-    })
-    await newAccount.save()
-    await newEWallet.save()
+    }
+    InsertEWallet(newEWallet)
     const token = jwt.sign(
       {
         accountToken: {
@@ -120,15 +110,9 @@ module.exports.resetPasswordController = async (req, res) => {
     return 
   }
   else if(req.body.email && req.body.password) {
-    const account = await Account.findOne({
-      email: req.body.email
-    })
+    const account = await GetAccountByEmail(email)
     if(account){
-      await Account.updateOne({
-        "_id": account.id
-      }, {
-        password: md5(req.body.password)
-      })
+      await UpdateAccountPassword(account.id, md5(req.body.password))
       const token = jwt.sign(
         {
           accountToken: {
@@ -165,19 +149,7 @@ module.exports.otpController = async(req, res) => {
     })
     return
   }
-  // const newAccount = await Account.findOne({
-  //   email: req.body.email
-  // })
-  // if(newAccount){
-  //   res.json({
-  //     "code": "error",
-  //     "msg": "email da duoc dang ky tai khoan"
-  //   })
-  //   return
-  // }
-  const isOtp = await Otp.findOne({
-    email: req.body.email
-  })
+  const isOtp = await GetOtp(email)
   if(isOtp){
     res.json({
       "code": "error",
@@ -191,8 +163,7 @@ module.exports.otpController = async(req, res) => {
     email: req.body.email,
     otp: otp
   }
-  const record = new Otp(data)
-  await record.save()
+  InsertOtp(data)
   const subject = "Xac thuc ma OTP"
   const text = `${otp}`
   sendMail(req.body.email, subject, text)
@@ -203,9 +174,7 @@ module.exports.otpController = async(req, res) => {
 }
 
 module.exports.getAccountController = async (req, res) => {
-  const account = await Account.findOne({
-    "_id": res.locals.account.id 
-  }).select("name email phone avatar role")
+  const account = await GetAccountById(res.locals.account.id)
   res.json({
     "code": "success",
     "msg": "Lấy account thành công",

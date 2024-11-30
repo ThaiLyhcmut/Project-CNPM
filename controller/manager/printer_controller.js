@@ -1,9 +1,7 @@
-const Printer = require("../../model/Printer")
+const { GetPrinter, InsertPrinter, UpdatePrinters } = require("../../service/printer_service")
 
 module.exports.postPrintController = async (req, res) => {
-  const newPrint = req.body
-  const record = new Printer(newPrint)
-  await record.save()
+  await InsertPrinter(req.body)
   res.json({
     code: "success",
     msg: "tao may in thanh cong",
@@ -21,7 +19,7 @@ module.exports.getPrintStatusController = async (req, res) => {
   if(req.query.price){
     sort.price = parseInt(req.query.price)
   }
-  const printer = await Printer.find(find).sort(sort)
+  const printer = await GetPrinter(find, sort)
   res.json({
     code: "success",
     msg: "lay may in thanh cong",
@@ -38,9 +36,7 @@ module.exports.getDetailController = async (req, res) => {
       "msg": "chua co id"
     })
   }
-  const printer = await Printer.findOne({
-    "_id": id
-  })
+  const printer = await GetPrinterById(id)
   res.json({
     "code": "error",
     "msg": "lay thong cong may in",
@@ -49,12 +45,8 @@ module.exports.getDetailController = async (req, res) => {
 }
 
 module.exports.patchChangeMuiltiPrintController = async (req, res) => {
-  IDs = req.body.ids
-  await Printer.updateMany({
-    "_id": IDs,
-  }, {
-    "status": req.body.status
-  })
+  ids = req.body.ids
+  await UpdatePrinters(ids, req.body.status)
   res.json({
     "code": "success",
     "msg": "Cập nhật thành công"
@@ -70,9 +62,7 @@ module.exports.patchChangePrinterController = async (req, res) => {
     })
     return
   }
-  await Printer.updateOne({
-    "_id": id
-  }, req.body)
+  await UpdatePrinter(id, req.body)
   res.json({
     "code": "success",
     "msg": "update may in thanh cong"
@@ -88,9 +78,7 @@ module.exports.deletePrinterController = async (req, res) => {
     })
     return
   }
-  await Printer.deleteOne({
-    "_id": id
-  })
+  await DeletePrinterById(id)
   res.json({
     "code": "success",
     "msg": "xoa may in thanh cong"

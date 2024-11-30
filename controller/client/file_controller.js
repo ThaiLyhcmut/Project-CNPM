@@ -1,14 +1,10 @@
 const { authorize, uploadFile } = require("../../helper/file_helper");
-const File = require("../../model/File")
 const pdf = require("pdf-parse");
-const fs = require("fs")
+const fs = require("fs");
+const { DeleteFile, InsertFile } = require("../../service/file_service");
 
 module.exports.getFileController = async (req, res) => {
-  const files = await File.find({
-    "accountId": res.locals.account.id
-  }).sort({
-    "updatedAt": 1
-  })
+  const files = await GetAllFileByAccountId(res.locals.account.id)
   res.json({
     "code": "success",
     "msg": "Lấy file thành công",
@@ -28,7 +24,7 @@ module.exports.deleteFileController = async (req, res) => {
 
   try {
     // Thực hiện xóa file
-    const result = await File.deleteOne({ "_id": fileId });
+    const result = await DeleteFile(fileId)
 
     // Kiểm tra xem file có tồn tại và đã được xóa thành công hay không
     if (result.deletedCount === 0) {
@@ -84,8 +80,7 @@ module.exports.fileController = async (req, res) => {
     pages: pages,
     accountId: res.locals.account.id
   }
-  const record = await File(data)
-  await record.save()
+  await InsertFile(data)
   res.json({
     "code": "success",
     "msg": "up file thành công",

@@ -1,9 +1,7 @@
-const File = require("../../model/File")
+const { GetFile } = require("../../service/file_service")
 
 module.exports.getFileController = async (req, res) => {
-  const files = await File.find().sort({
-    "updatedAt": 1
-  })
+  const files = await GetFile()
   res.json({
     "code": "success",
     "msg": "Lấy file thành công",

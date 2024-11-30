@@ -1,9 +1,6 @@
-const Printer = require("../../model/Printer")
-const Account = require("../../model/Account")
-const EWallet = require("../../model/E-wallets")
-const File = require("../../model/File")
-const History = require("../../model/History")
-const Field = require("../../model/Field")
+const { GetPrinter } = require("../../service/printer_service")
+const { GetFileById } = require("../../service/file_service")
+const { GetEWalletByAccountId } = require("../../service/e-wallet_service")
 
 
 module.exports.printerController = async (req, res) => {
@@ -18,7 +15,7 @@ module.exports.printerController = async (req, res) => {
   if(req.query.price){
     sort.price = parseInt(req.query.price)
   }
-  const printer = await Printer.find(find).sort(sort)
+  const printer = await GetPrinter(find, sort)
   res.json({
     listPrinter: printer
   })
@@ -32,9 +29,7 @@ module.exports.getDetailController = async (req, res) => {
       "msg": "chua co id"
     })
   }
-  const printer = await Printer.findOne({
-    "_id": id
-  })
+  const printer = await GetPrinter(id)
   res.json({
     "code": "error",
     "msg": "lay thong cong may in",
@@ -45,9 +40,7 @@ module.exports.getDetailController = async (req, res) => {
 module.exports.postPrinterController = async (req, res) => {
   const PrinterId = req.body.printerId
   const FileId = req.body.fileId
-  const file = await File.findOne({
-    "_id": FileId
-  })
+  const file = GetFileById(FileId)
   if(!file){
     res.json({
       "code": "error",
@@ -55,11 +48,7 @@ module.exports.postPrinterController = async (req, res) => {
     })
     return
   }
-  const printer = await Printer.findOne({
-    "_id": PrinterId,
-    "deleted": false,
-    "status": "active"
-  })
+  const printer = await GetPrinterById(PrinterId)
   if (!printer){
     res.json({
       "code": "error",
@@ -68,9 +57,7 @@ module.exports.postPrinterController = async (req, res) => {
     return
   }
   const account  = res.locals.account
-  const eWallet = await EWallet.findOne({
-    accountId: account.id
-  })
+  const eWallet = await GetEWalletByAccountId(account.id)
   if (!eWallet) {
     res.json({
       "code": "error",
@@ -90,11 +77,7 @@ module.exports.postPrinterController = async (req, res) => {
     return
   }
   balancePaperNew = eWallet.balancePaper - paper
-  await EWallet.updateOne({
-    "_id": eWallet.id
-  }, {
-    balancePaper: balancePaperNew
-  })
+  await UpdateEWalletPaper(eWallet.id, eWallet.balance, balancePaperNew)
   res.json({
     "code": "success",
     "msg": "Bạn đã in thành công",
@@ -111,6 +94,5 @@ module.exports.postPrinterController = async (req, res) => {
     status: "doing",
     printerId: printer.id
   }
-  const record = new History(dataHistory)
-  await record.save()
+  await InsertHistory(dataHistory)
 }

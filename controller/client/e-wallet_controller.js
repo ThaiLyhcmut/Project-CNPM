@@ -1,15 +1,12 @@
-const EWallet = require("../../model/E-wallets")
 require('dotenv').config();
 const secret = process.env.JWT_SECRET
 const jwt = require("jsonwebtoken");
-const Field = require("../../model/Field");
-const Account = require("../../model/Account");
-const History = require("../../model/History");
+const { GetEWalletByAccountId, UpdateEWalletPaper, UpdateEWalletByAccountId } = require("../../service/e-wallet_service");
+const { InsertField } = require('../../service/field_service');
+
 module.exports.eWalletController = async (req, res) => {
   const account = res.locals.account
-  const ewallet = await EWallet.findOne({
-    accountId: account.id
-  })
+  const ewallet = await GetEWalletByAccountId(account.id)
   res.json({
     "code": "success",
     "msg": "lấy ví điện tử thành công",
@@ -18,34 +15,26 @@ module.exports.eWalletController = async (req, res) => {
 }
 
 module.exports.changeEWalletController = async (req, res) => {
+  if(!req.body.value || isNaN(parseInt(req.body.value))) {
+    return req.json({
+      code: "error",
+      msg: "Loi roi"
+    })
+  }
   switch (req.body.type) {
     case "add":
-      await EWallet.updateOne({
-        accountId: res.locals.account.id
-      }, {
-        $inc: {
-          balance: parseInt(req.body.value)
-        }
-      })
+      await UpdateEWalletByAccountId(res.locals.account.id, parseInt(req.body.value))
       res.json({
         "code": "success",
         "msg": "Nạp tiền thành công"
       })
       return
     case "sub":
-      const eWallet = await EWallet.findOne({
-        accountId: res.locals.account.id
-      })
+      const eWallet = await GetEWalletByAccountId(res.locals.account.id)
       if(eWallet.balance < parseInt(req.body.value)){
         break;
       }
-      await EWallet.updateOne({
-        accountId: res.locals.account.id
-      }, {
-        $inc: {
-          balance: -parseInt(req.body.value)
-        }
-      })
+      await UpdateEWalletByAccountId(res.locals.account.id, -parseInt(balance))
       res.json({
         "code": "success",
         "msg": "Thanh toán thành công"
@@ -85,16 +74,8 @@ module.exports.getEWaleetController = async (req, res) => {
         return 
       } else {
         const account = decoded.accountToken;
-        await EWallet.updateOne({
-          "accountId": account.id
-        }, {
-          $inc: {
-            balance: amount
-          } 
-        })
-        const ewallet = await EWallet.findOne({
-          "accountId": account.id
-        })
+        await UpdateEWalletByAccountId(account.id, amount)
+        const ewallet = await GetEWalletByAccountId(account.id)
         res.json({
           "code": "success",
           "msg": "Nap tien thanh cong"
@@ -106,8 +87,7 @@ module.exports.getEWaleetController = async (req, res) => {
           balance: ewallet.balance,
           historyId: ""
         }
-        const record = new Field(data)
-        await record.save()
+        InsertField(data)
       }
     });
   }catch(error){
@@ -134,9 +114,7 @@ module.exports.postBuyPaper = async (req, res) => {
       msg: "Số giấy không hợp lệ",
     });
   }
-  const eWallet = await EWallet.findOne({
-    "accountId": res.locals.account.id
-  })
+  const eWallet = await GetEWalletByAccountId(res.locals.account.id)
   if(!eWallet){
     return res.json({
       code: "error",
@@ -148,22 +126,17 @@ module.exports.postBuyPaper = async (req, res) => {
       code: "error",
       msg: "ban khong du tien",
     });
-  }os
+  }
   const balanceNew = eWallet.balance - balancePaper*500
-  await EWallet.updateOne({
-    "_id": eWallet.id
-  }, {
-    balance: balanceNew,
-    balancePaper: eWallet.balancePaper + balancePaper
-  })
-  const record = new Field({
+  await UpdateEWalletPaper(eWallet.id, balanceNew, eWallet.balancePaper + balancePaper)
+  const data = {
     "accountId": res.locals.account.id,
     "transaction": "Buy paper",
     "amount": balancePaper*500,
     "balance": balanceNew,
     "historyId": "",
-  })
-  await record.save()
+  }
+  InsertField(data)
   res.json({
     "code": "success",
     "msg": "Mua giay thanh cong"

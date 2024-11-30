@@ -1,4 +1,4 @@
-const History = require("../../model/History")
+const { GetHistory } = require("../../service/history_service")
 
 module.exports.getHistoryController = async(req, res) => {
   const find = {}
@@ -17,7 +17,7 @@ module.exports.getHistoryController = async(req, res) => {
   if(req.query.accountId){
     find.accountId = req.query.accountId
   }
-  const historys = await History.find(find)
+  const historys = await GetHistory(find)
   res.json({
     "code": "success",
     "historys": historys

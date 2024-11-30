@@ -1,13 +1,8 @@
-const md5 = require("md5")
-const Account = require("../../model/Account")
-const jwt = require("jsonwebtoken")
+const { GetAccountById } = require("../../service/account_service");
 require('dotenv').config();
-const secret = process.env.JWT_SECRET
 
 module.exports.getAccountController = async (req, res) => {
-  const account = await Account.findOne({
-    "_id": res.locals.account.id 
-  }).select("name email phone avatar role")
+  const account = await GetAccountById(res.locals.account.id)
   res.json({
     "code": "success",
     "msg": "Lấy account thành công",
@@ -24,10 +19,7 @@ module.exports.getAcoountStudentController = async (req, res) => {
     })
     return
   }
-  const account = await Account.findOne({
-    "_id": id,
-    "role": "student"
-  }).select("name email")
+  const account = await GetAccountById(id)
   res.json({
     "code": "error",
     "msg": "Lấy ra account thành công",
@@ -36,9 +28,7 @@ module.exports.getAcoountStudentController = async (req, res) => {
 }
 
 module.exports.getAllAcountController = async (req, res) => {
-  const accounts = await Account.find({
-    "role": "student"
-  }).select("name id phone email")
+  const accounts = await GetAccountRoleStudent()
   res.json({
     "code": "success",
     "accounts": accounts
