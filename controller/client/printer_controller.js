@@ -2,6 +2,7 @@ const { GetPrinter, GetPrinterById } = require("../../service/printer_service")
 const { GetFileById } = require("../../service/file_service")
 const { GetEWalletByAccountId, UpdateEWalletPaper } = require("../../service/e-wallet_service")
 const { InsertHistory } = require("../../service/history_service")
+const { isValidObjectId } = require("mongoose")
 
 
 module.exports.printerController = async (req, res) => {
@@ -24,7 +25,7 @@ module.exports.printerController = async (req, res) => {
 
 module.exports.getDetailController = async (req, res) => {
   const id = req.params.id
-  if(!id){
+  if(!id || !isValidObjectId(id)){
     res.json({
       "code": "error",
       "msg": "chua co id"
@@ -41,14 +42,14 @@ module.exports.getDetailController = async (req, res) => {
 module.exports.postPrinterController = async (req, res) => {
   const PrinterId = req.body.printerId
   const FileId = req.body.fileId
-  if(!FileId){
+  if(!FileId || !isValidObjectId(id)){
     res.json({
       "code": "error",
       "msg": "không tìm thấy file"
     })
     return
   }
-  if (!PrinterId){
+  if (!PrinterId || !isValidObjectId(id)){
     res.json({
       "code": "error",
       "msg": "không tìm thấy may in"

@@ -3,14 +3,29 @@ const slug = require('mongoose-slug-updater')
 mongoose.plugin(slug)
 
 const PrinterSchema = new mongoose.Schema({
-  cs: Number,
+  cs: {
+    type: Number,
+    default: 1
+  },
   brand: String,
   modle: String,
   description: String,
-  location: String,
-  status: String,
-  type: String,
-  deleted: Boolean
+  location: {
+    type: String,
+    default: ""
+  },
+  status: {
+    type: String,
+    default: "active"
+  },
+  type: {
+    type: String,
+    default: "A3"
+  },
+  deleted: {
+    type: Boolean,
+    default: false
+  }
 },{
   timestamps: true,
   }

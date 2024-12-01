@@ -1,3 +1,4 @@
+const { isValidObjectId } = require("mongoose");
 const { GetAccountById, GetAccountRoleStudent } = require("../../service/account_service");
 require('dotenv').config();
 
@@ -12,7 +13,7 @@ module.exports.getAccountController = async (req, res) => {
 
 module.exports.getAcoountStudentController = async (req, res) => {
   const id = req.params.id
-  if(!id) {
+  if(!id || !isValidObjectId(id)) {
     res.json({
       "code": "error",
       "msg": "id may dau troi oi"

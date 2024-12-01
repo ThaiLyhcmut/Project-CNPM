@@ -2,6 +2,7 @@ const { authorize, uploadFile } = require("../../helper/file_helper");
 const pdf = require("pdf-parse");
 const fs = require("fs");
 const { DeleteFile, InsertFile, GetAllFileByAccountId } = require("../../service/file_service");
+const { isValidObjectId } = require("mongoose");
 
 module.exports.getFileController = async (req, res) => {
   const files = await GetAllFileByAccountId(res.locals.account.id)
@@ -15,7 +16,7 @@ module.exports.getFileController = async (req, res) => {
 module.exports.deleteFileController = async (req, res) => {
   const fileId = req.params.id;
 
-  if (!fileId) {
+  if (!fileId || !isValidObjectId(id)) {
     return res.status(400).json({
       code: "error",
       msg: "Lỗi: Không tìm thấy ID của file"

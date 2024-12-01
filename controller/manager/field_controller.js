@@ -8,7 +8,7 @@ module.exports.getFieldController = async (req, res) => {
   if(req.query.transaction){
     find.transaction = req.query.transaction
   }
-  const field = await GetField()
+  const field = await GetField(find)
   res.json({
     "code":"success",
     "msg": "Lấy field thành công",

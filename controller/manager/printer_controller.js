@@ -1,3 +1,4 @@
+const { isValidObjectId } = require("mongoose")
 const { GetPrinter, InsertPrinter, UpdatePrinters, GetPrinterById, UpdatePrinter, DeletePrinterById } = require("../../service/printer_service")
 
 module.exports.postPrintController = async (req, res) => {
@@ -30,7 +31,7 @@ module.exports.getPrintStatusController = async (req, res) => {
 
 module.exports.getDetailController = async (req, res) => {
   const id = req.params.id
-  if(!id){
+  if(!id || !isValidObjectId(id)){
     res.json({
       "code": "error",
       "msg": "chua co id"
@@ -67,7 +68,7 @@ module.exports.patchChangeMuiltiPrintController = async (req, res) => {
 
 module.exports.patchChangePrinterController = async (req, res) => {
   const id = req.params.id
-  if(!id){
+  if(!id || !isValidObjectId(id)){
     res.json({
       "code": "error",
       "msg": "id m dau"
@@ -83,7 +84,7 @@ module.exports.patchChangePrinterController = async (req, res) => {
 
 module.exports.deletePrinterController = async (req, res) => {
   const id = req.params.id
-  if(!id){
+  if(!id || !isValidObjectId(id)){
     res.json({
       "code": "error",
       "msg": "id m dau"
