@@ -1,6 +1,7 @@
-const { GetPrinter } = require("../../service/printer_service")
+const { GetPrinter, GetPrinterById } = require("../../service/printer_service")
 const { GetFileById } = require("../../service/file_service")
-const { GetEWalletByAccountId } = require("../../service/e-wallet_service")
+const { GetEWalletByAccountId, UpdateEWalletPaper } = require("../../service/e-wallet_service")
+const { InsertHistory } = require("../../service/history_service")
 
 
 module.exports.printerController = async (req, res) => {
@@ -40,16 +41,23 @@ module.exports.getDetailController = async (req, res) => {
 module.exports.postPrinterController = async (req, res) => {
   const PrinterId = req.body.printerId
   const FileId = req.body.fileId
-  const file = GetFileById(FileId)
-  if(!file){
+  if(!FileId){
     res.json({
       "code": "error",
       "msg": "không tìm thấy file"
     })
     return
   }
+  if (!PrinterId){
+    res.json({
+      "code": "error",
+      "msg": "không tìm thấy may in"
+    })
+    return
+  }
+  const file = await GetFileById(FileId)
   const printer = await GetPrinterById(PrinterId)
-  if (!printer){
+  if (!file || !printer) {
     res.json({
       "code": "error",
       "msg": "không tìm thấy may in"
@@ -58,6 +66,7 @@ module.exports.postPrinterController = async (req, res) => {
   }
   const account  = res.locals.account
   const eWallet = await GetEWalletByAccountId(account.id)
+  console.log(eWallet)
   if (!eWallet) {
     res.json({
       "code": "error",
@@ -77,12 +86,15 @@ module.exports.postPrinterController = async (req, res) => {
     return
   }
   balancePaperNew = eWallet.balancePaper - paper
+  console.log(balancePaperNew)
   await UpdateEWalletPaper(eWallet.id, eWallet.balance, balancePaperNew)
+  console.log(123)
   res.json({
     "code": "success",
     "msg": "Bạn đã in thành công",
     "balancePaper": balancePaperNew
   })
+  
   const dataHistory = {
     accountId: account.id,
     cs: printer.cs,

@@ -1,4 +1,4 @@
-const { GetAccountById } = require("../../service/account_service");
+const { GetAccountById, GetAccountRoleStudent } = require("../../service/account_service");
 require('dotenv').config();
 
 module.exports.getAccountController = async (req, res) => {

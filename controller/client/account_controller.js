@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const md5 = require("md5");
 const { generateRandomNumber } = require("../../helper/generate_helper");
 const { sendMail } = require("../../helper/sendMail_helper");
-const { GetOtp, UpdateAccountPassword, InsertAccount, GetAccountByEmail, GetAccountById } = require("../../service/account_service");
+const { GetOtp, UpdateAccountPassword, InsertAccount, GetAccountByEmail, GetAccountById, InsertOtp, DeleteOtp } = require("../../service/account_service");
 const { InsertEWallet } = require("../../service/e-wallet_service");
 require('dotenv').config();
 const secret = process.env.JWT_SECRET; 
@@ -66,15 +66,15 @@ module.exports.resetPasswordController = async (req, res) => {
       "msg": "Mầy biến khỏi đây"
     })
   }
-  const isOtp = await GetOtp(email)
-  if(!isOtp || isOtp.otp != otp){
+  const isOtp = await GetOtp(req.body.email)
+  if(!isOtp || isOtp.otp != req.body.otp){
     res.json({
       "code": "error",
       "msg": "otp không hợp lệ"
     })
     return
   }
-  DeleteOtp()
+  DeleteOtp(req.body.email, req.body.otp)
   if(req.body.email && req.body.password && req.body.name && req.body.phone){
     req.body.role = "student"
     req.body.password = md5(req.body.password)
@@ -110,7 +110,7 @@ module.exports.resetPasswordController = async (req, res) => {
     return 
   }
   else if(req.body.email && req.body.password) {
-    const account = await GetAccountByEmail(email)
+    const account = await GetAccountByEmail(req.body.email)
     if(account){
       await UpdateAccountPassword(account.id, md5(req.body.password))
       const token = jwt.sign(
@@ -149,7 +149,7 @@ module.exports.otpController = async(req, res) => {
     })
     return
   }
-  const isOtp = await GetOtp(email)
+  const isOtp = await GetOtp(req.body.email)
   if(isOtp){
     res.json({
       "code": "error",

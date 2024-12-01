@@ -1,7 +1,7 @@
 const { authorize, uploadFile } = require("../../helper/file_helper");
 const pdf = require("pdf-parse");
 const fs = require("fs");
-const { DeleteFile, InsertFile } = require("../../service/file_service");
+const { DeleteFile, InsertFile, GetAllFileByAccountId } = require("../../service/file_service");
 
 module.exports.getFileController = async (req, res) => {
   const files = await GetAllFileByAccountId(res.locals.account.id)
@@ -80,7 +80,7 @@ module.exports.fileController = async (req, res) => {
     pages: pages,
     accountId: res.locals.account.id
   }
-  await InsertFile(data)
+  const record = await InsertFile(data)
   res.json({
     "code": "success",
     "msg": "up file thành công",

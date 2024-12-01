@@ -1,4 +1,4 @@
-const { GetPrinter, InsertPrinter, UpdatePrinters } = require("../../service/printer_service")
+const { GetPrinter, InsertPrinter, UpdatePrinters, GetPrinterById, UpdatePrinter, DeletePrinterById } = require("../../service/printer_service")
 
 module.exports.postPrintController = async (req, res) => {
   await InsertPrinter(req.body)
@@ -46,6 +46,18 @@ module.exports.getDetailController = async (req, res) => {
 
 module.exports.patchChangeMuiltiPrintController = async (req, res) => {
   ids = req.body.ids
+  if (!req.body.status){
+    res.json({
+      "code": "eroor"
+    })
+    return
+  }
+  if (ids.length < 0) {
+    res.json({
+      "code": "eroor"
+    })
+    return
+  }
   await UpdatePrinters(ids, req.body.status)
   res.json({
     "code": "success",

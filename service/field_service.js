@@ -9,7 +9,7 @@ module.exports.InsertField = async (data) => {
 
 // Get Field
 module.exports.GetFieldByAccountId = async (id) => {
-  return await Field.findOne({
+  return await Field.find({
     accountId: id
   })
 }
