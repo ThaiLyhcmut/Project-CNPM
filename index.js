@@ -41,11 +41,16 @@ async function processPrintJob(printerID, change) {
   return new Promise((resolve) => {
     setTimeout(async () => {
       console.log(`Máy in ${printerID} đang in cho ${change.fullDocument._id}`)
-      await History.updateOne({
-        "_id": change.fullDocument._id
-      }, {
-        "status": "success"
-      })
+      try {
+        await History.updateOne({
+          "_id": change.fullDocument._id
+        }, {
+          "status": "success"
+        })
+      }
+      catch (error) {
+        console.log("In that bai")
+      }
       resolve();
     }, 20000);
   });

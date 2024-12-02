@@ -25,6 +25,12 @@ module.exports.requireAuth = async (req, res, next) => {
       });
     } else {
       res.locals.account = decoded.accountToken;
+      if(!decoded.accountToken || !decoded.accountToken.key || !decoded.accountToken.role) {
+        return res.status(403).json({
+          "code": "error",
+          "msg": "Token không hợp lệ 2"
+        })
+      }
       if(decoded.accountToken.key === md5(userAgent) && decoded.accountToken.role === "student"){
         next()
       }

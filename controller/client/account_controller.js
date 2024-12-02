@@ -17,7 +17,15 @@ module.exports.loginController = async (req, res) => {
   }
   const email = req.body.email
   const password = req.body.password
-  const account = await GetAccountByEmail(email)
+  let account
+  try {
+    account = await GetAccountByEmail(email)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  }
   if(!email){
     res.json({
       code: "email khong ton tai"
@@ -66,7 +74,15 @@ module.exports.resetPasswordController = async (req, res) => {
       "msg": "Mầy biến khỏi đây"
     })
   }
-  const isOtp = await GetOtp(req.body.email)
+  let isOtp
+  try {
+    const isOtp = await GetOtp(req.body.email)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  }
   if(!isOtp || isOtp.otp != req.body.otp){
     res.json({
       "code": "error",
@@ -79,7 +95,14 @@ module.exports.resetPasswordController = async (req, res) => {
     req.body.role = "student"
     req.body.password = md5(req.body.password)
     req.body.avatar = ""
-    await InsertAccount(req.body)
+    try {
+      await InsertAccount(req.body)
+    }
+    catch (error) {
+      return res.json({
+        "code": "error"
+      })
+    }
     const newEWallet = {
       "accountId": newAccount.id,
       "balance": 0,
@@ -110,9 +133,24 @@ module.exports.resetPasswordController = async (req, res) => {
     return 
   }
   else if(req.body.email && req.body.password) {
-    const account = await GetAccountByEmail(req.body.email)
+    let account
+    try {
+      account = await GetAccountByEmail(req.body.email)
+    }
+    catch (e) {
+      return res.json({
+        "code": "error"
+      })
+    } 
     if(account){
-      await UpdateAccountPassword(account.id, md5(req.body.password))
+      try {
+        await UpdateAccountPassword(account.id, md5(req.body.password))
+      }
+      catch (e) {
+        return res.json({
+          "code": "error"
+        })
+      } 
       const token = jwt.sign(
         {
           accountToken: {
@@ -149,7 +187,22 @@ module.exports.otpController = async(req, res) => {
     })
     return
   }
-  const isOtp = await GetOtp(req.body.email)
+  const regex = /^[a-zA-Z0-9._%+-]+@hcmut\.edu\.vn/;
+  if (!regex.test(req.body.email)) {
+    return res.json({
+      "code": "error",
+      "msg": "Email không phải thuộc tổ chức của ĐHBK"
+    })
+  }
+  let isOtp
+  try {
+    isOtp = await GetOtp(req.body.email)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   if(isOtp){
     res.json({
       "code": "error",
@@ -174,7 +227,15 @@ module.exports.otpController = async(req, res) => {
 }
 
 module.exports.getAccountController = async (req, res) => {
-  const account = await GetAccountById(res.locals.account.id)
+  let account
+  try{ 
+    account = await GetAccountById(res.locals.account.id)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   res.json({
     "code": "success",
     "msg": "Lấy account thành công",

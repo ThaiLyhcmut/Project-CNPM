@@ -8,6 +8,12 @@ module.exports.rftoken = async(req, res) => {
   const authHeader = req.headers['authorization'];
   const reftoken = authHeader && authHeader.split(' ')[1];
   const userAgent = req.headers['user-agent'];
+  if (!userAgent) {
+    return res.status(401).json({
+      "code": "error",
+      "msg": "userAgent không được cung cấp"
+    });
+  }
   if (!reftoken) {
     return res.status(401).json({
       "code": "error",

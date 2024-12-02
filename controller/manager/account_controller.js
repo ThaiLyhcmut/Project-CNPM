@@ -3,7 +3,15 @@ const { GetAccountById, GetAccountRoleStudent } = require("../../service/account
 require('dotenv').config();
 
 module.exports.getAccountController = async (req, res) => {
-  const account = await GetAccountById(res.locals.account.id)
+  let account
+  try {
+    account = await GetAccountById(res.locals.account.id)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   res.json({
     "code": "success",
     "msg": "Lấy account thành công",

@@ -6,7 +6,15 @@ const { InsertField } = require('../../service/field_service');
 
 module.exports.eWalletController = async (req, res) => {
   const account = res.locals.account
-  const ewallet = await GetEWalletByAccountId(account.id)
+  let ewallet
+  try {
+    ewallet = await GetEWalletByAccountId(account.id)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   res.json({
     "code": "success",
     "msg": "lấy ví điện tử thành công",
@@ -23,18 +31,45 @@ module.exports.changeEWalletController = async (req, res) => {
   }
   switch (req.body.type) {
     case "add":
-      await UpdateEWalletByAccountId(res.locals.account.id, parseInt(req.body.value))
+      try {
+        await UpdateEWalletByAccountId(res.locals.account.id, parseInt(req.body.value))
+      }
+      catch (e) {
+        return res.json({
+          "code": "error"
+        })
+      } 
       res.json({
         "code": "success",
         "msg": "Nạp tiền thành công"
       })
       return
     case "sub":
-      const eWallet = await GetEWalletByAccountId(res.locals.account.id)
+      let eWallet
+      try {
+        eWallet = await GetEWalletByAccountId(res.locals.account.id)
+      }
+      catch (e) {
+        return res.json({
+          "code": "error"
+        })
+      } 
+      if (!eWallet){
+        return res.json({
+          "code": "error"
+        })
+      }
       if(eWallet.balance < parseInt(req.body.value)){
         break;
       }
-      await UpdateEWalletByAccountId(res.locals.account.id, -parseInt(balance))
+      try {
+        await UpdateEWalletByAccountId(res.locals.account.id, -parseInt(balance))
+      }
+      catch (e) {
+        return res.json({
+          "code": "error"
+        })
+      } 
       res.json({
         "code": "success",
         "msg": "Thanh toán thành công"
@@ -74,8 +109,23 @@ module.exports.getEWaleetController = async (req, res) => {
         return 
       } else {
         const account = decoded.accountToken;
-        await UpdateEWalletByAccountId(account.id, amount)
-        const ewallet = await GetEWalletByAccountId(account.id)
+        try {
+          await UpdateEWalletByAccountId(account.id, amount)
+        }
+        catch (e) {
+          return res.json({
+            "code": "error"
+          })
+        } 
+        let ewallet
+        try {
+          ewallet = await GetEWalletByAccountId(account.id)
+        }
+        catch (e) {
+          return res.json({
+            "code": "error"
+          })
+        } 
         res.json({
           "code": "success",
           "msg": "Nap tien thanh cong"
@@ -114,7 +164,15 @@ module.exports.postBuyPaper = async (req, res) => {
       msg: "Số giấy không hợp lệ",
     });
   }
-  const eWallet = await GetEWalletByAccountId(res.locals.account.id)
+  let eWallet
+  try {
+    eWallet = await GetEWalletByAccountId(res.locals.account.id)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   if(!eWallet){
     return res.json({
       code: "error",
@@ -128,7 +186,14 @@ module.exports.postBuyPaper = async (req, res) => {
     });
   }
   const balanceNew = eWallet.balance - balancePaper*500
-  await UpdateEWalletPaper(eWallet.id, balanceNew, eWallet.balancePaper + balancePaper)
+  try {
+    await UpdateEWalletPaper(eWallet.id, balanceNew, eWallet.balancePaper + balancePaper)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   const data = {
     "accountId": res.locals.account.id,
     "transaction": "Buy paper",

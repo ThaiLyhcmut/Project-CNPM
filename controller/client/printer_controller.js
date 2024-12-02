@@ -42,22 +42,31 @@ module.exports.getDetailController = async (req, res) => {
 module.exports.postPrinterController = async (req, res) => {
   const PrinterId = req.body.printerId
   const FileId = req.body.fileId
-  if(!FileId || !isValidObjectId(id)){
+  if(!FileId || !isValidObjectId(FileId)){
     res.json({
       "code": "error",
       "msg": "không tìm thấy file"
     })
     return
   }
-  if (!PrinterId || !isValidObjectId(id)){
+  if (!PrinterId || !isValidObjectId(PrinterId)){
     res.json({
       "code": "error",
       "msg": "không tìm thấy may in"
     })
     return
   }
-  const file = await GetFileById(FileId)
-  const printer = await GetPrinterById(PrinterId)
+  let file
+  let printer
+  try {
+    file = await GetFileById(FileId)
+    printer = await GetPrinterById(PrinterId)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   if (!file || !printer) {
     res.json({
       "code": "error",
@@ -66,7 +75,15 @@ module.exports.postPrinterController = async (req, res) => {
     return
   }
   const account  = res.locals.account
-  const eWallet = await GetEWalletByAccountId(account.id)
+  let eWallet
+  try {
+    eWallet = await GetEWalletByAccountId(account.id)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   console.log(eWallet)
   if (!eWallet) {
     res.json({
@@ -88,7 +105,14 @@ module.exports.postPrinterController = async (req, res) => {
   }
   balancePaperNew = eWallet.balancePaper - paper
   console.log(balancePaperNew)
-  await UpdateEWalletPaper(eWallet.id, eWallet.balance, balancePaperNew)
+  try {
+    await UpdateEWalletPaper(eWallet.id, eWallet.balance, balancePaperNew)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   console.log(123)
   res.json({
     "code": "success",

@@ -17,7 +17,15 @@ module.exports.getHistoryController = async(req, res) => {
   if(req.query.accountId){
     find.accountId = req.query.accountId
   }
-  const historys = await GetHistory(find)
+  let historys
+  try {
+    historys = await GetHistory(find)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   res.json({
     "code": "success",
     "historys": historys

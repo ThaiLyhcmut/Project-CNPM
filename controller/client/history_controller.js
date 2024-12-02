@@ -2,7 +2,15 @@ const { DeleteManyHistory, GetHistoryByAccountId } = require("../../service/hist
 
 module.exports.getHistoryController = async (req, res) => {
   const account = res.locals.account
-  const historys = await GetHistoryByAccountId(account.id)
+  let historys
+  try {
+    historys = await GetHistoryByAccountId(account.id)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   res.json({
     "code": "success",
     "msg": "lay thanh cong historys",
@@ -12,7 +20,14 @@ module.exports.getHistoryController = async (req, res) => {
 
 module.exports.deleteHistoryManyController = async (req, res) => {
   const ids = req.body.ids
-  await DeleteManyHistory(ids)
+  try {
+    await DeleteManyHistory(ids)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   res.json({
     "code": "success",
     "msg": "xoa lich su thanh cong",

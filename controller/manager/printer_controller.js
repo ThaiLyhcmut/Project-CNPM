@@ -2,7 +2,14 @@ const { isValidObjectId } = require("mongoose")
 const { GetPrinter, InsertPrinter, UpdatePrinters, GetPrinterById, UpdatePrinter, DeletePrinterById } = require("../../service/printer_service")
 
 module.exports.postPrintController = async (req, res) => {
-  await InsertPrinter(req.body)
+  try {
+    await InsertPrinter(req.body)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   res.json({
     code: "success",
     msg: "tao may in thanh cong",
@@ -20,7 +27,15 @@ module.exports.getPrintStatusController = async (req, res) => {
   if(req.query.price){
     sort.price = parseInt(req.query.price)
   }
-  const printer = await GetPrinter(find, sort)
+  let printer
+  try {
+    printer = await GetPrinter(find, sort)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   res.json({
     code: "success",
     msg: "lay may in thanh cong",
@@ -37,7 +52,15 @@ module.exports.getDetailController = async (req, res) => {
       "msg": "chua co id"
     })
   }
-  const printer = await GetPrinterById(id)
+  let printer
+  try {
+    printer = await GetPrinterById(id)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   res.json({
     "code": "error",
     "msg": "lay thong cong may in",
@@ -59,7 +82,14 @@ module.exports.patchChangeMuiltiPrintController = async (req, res) => {
     })
     return
   }
-  await UpdatePrinters(ids, req.body.status)
+  try {
+    await UpdatePrinters(ids, req.body.status)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   res.json({
     "code": "success",
     "msg": "Cập nhật thành công"
@@ -75,7 +105,14 @@ module.exports.patchChangePrinterController = async (req, res) => {
     })
     return
   }
-  await UpdatePrinter(id, req.body)
+  try{
+    await UpdatePrinter(id, req.body)
+  }
+  catch (error) {
+    return res.json({
+      "code": "error"
+    })
+  }
   res.json({
     "code": "success",
     "msg": "update may in thanh cong"
@@ -91,7 +128,14 @@ module.exports.deletePrinterController = async (req, res) => {
     })
     return
   }
-  await DeletePrinterById(id)
+  try {
+    await DeletePrinterById(id)
+  }
+  catch (e) {
+    return res.json({
+      "code": "error"
+    })
+  } 
   res.json({
     "code": "success",
     "msg": "xoa may in thanh cong"
