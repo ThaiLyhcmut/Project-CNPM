@@ -76,7 +76,7 @@ module.exports.resetPasswordController = async (req, res) => {
   }
   let isOtp
   try {
-    const isOtp = await GetOtp(req.body.email)
+    isOtp = await GetOtp(req.body.email)
   }
   catch (e) {
     return res.json({
@@ -95,8 +95,9 @@ module.exports.resetPasswordController = async (req, res) => {
     req.body.role = "student"
     req.body.password = md5(req.body.password)
     req.body.avatar = ""
+    let newAccount
     try {
-      await InsertAccount(req.body)
+      newAccount = await InsertAccount(req.body)
     }
     catch (error) {
       return res.json({

@@ -74,6 +74,4 @@ module.exports.rftoken = async(req, res) => {
       } 
     }
   })
-  
-  
 }
